@@ -2,6 +2,9 @@
 
 A Dockerized first-come, first-served school admission application using **ASP.NET Core 8**, **PostgreSQL 16**, **React 18**, and **Vite**.
 
+<img width="2494" height="1271" alt="image" src="https://github.com/user-attachments/assets/0d73f8e4-e0bd-4817-b23c-59e773f2c99a" />
+
+
 ## Quick start
 
 1. Install Docker Desktop and enable Docker Compose.
