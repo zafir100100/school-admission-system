@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: admissions
+      POSTGRES_USER: admissions
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_password}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admissions -d admissions"]
+      interval: 3s
+      retries: 20
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: Host=db;Port=5432;Database=admissions;Username=admissions;Password=${POSTGRES_PASSWORD:-local_dev_password}
+      HOLD_DURATION_SECONDS: ${HOLD_DURATION_SECONDS:-600}
+      Cors__Origins__0: ${FRONTEND_ORIGIN:-http://localhost:3000}
+    ports:
+      - '8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+    ports:
+      - '3000:80'
+    depends_on:
+      - backend
+volumes:
+  postgres_data:
