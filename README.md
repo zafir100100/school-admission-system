@@ -4,7 +4,6 @@ A Dockerized first-come, first-served school admission application using **ASP.N
 
 <img width="2494" height="1271" alt="image" src="https://github.com/user-attachments/assets/0d73f8e4-e0bd-4817-b23c-59e773f2c99a" />
 
-
 ## Quick start
 
 1. Install Docker Desktop and enable Docker Compose.
@@ -21,16 +20,16 @@ Copy `.env.example` to `.env` to customize `POSTGRES_PASSWORD`, `HOLD_DURATION_S
 
 ## API contract
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/classes` | Create class `{ "name": "Class 6 - Morning Shift", "totalSeats": 120 }` |
-| GET | `/classes` | List classes and available/held/confirmed seat counts |
-| GET | `/classes/{classId}` | Class details and counts |
-| POST | `/classes/{classId}/holds` | Reserve a seat (requires `X-Student-Id`) |
-| GET | `/holds/{holdId}` | Get current application status |
-| POST | `/holds/{holdId}/confirm` | Simulated fee payment and confirmation (requires `X-Student-Id`) |
-| DELETE | `/holds/{holdId}` | Cancel pending application (requires `X-Student-Id`) |
-| GET | `/me/holds` | All applications belonging to the student (requires `X-Student-Id`) |
+| Method | Path                       | Purpose                                                                 |
+| ------ | -------------------------- | ----------------------------------------------------------------------- |
+| POST   | `/classes`                 | Create class `{ "name": "Class 6 - Morning Shift", "totalSeats": 120 }` |
+| GET    | `/classes`                 | List classes and available/held/confirmed seat counts                   |
+| GET    | `/classes/{classId}`       | Class details and counts                                                |
+| POST   | `/classes/{classId}/holds` | Reserve a seat (requires `X-Student-Id`)                                |
+| GET    | `/holds/{holdId}`          | Get current application status                                          |
+| POST   | `/holds/{holdId}/confirm`  | Simulated fee payment and confirmation (requires `X-Student-Id`)        |
+| DELETE | `/holds/{holdId}`          | Cancel pending application (requires `X-Student-Id`)                    |
+| GET    | `/me/holds`                | All applications belonging to the student (requires `X-Student-Id`)     |
 
 Student ID is exactly 17 numeric characters. All responses use JSON except successful DELETE (204). No authentication is specified by the assignment; see `ASSUMPTIONS.md` for security limitations.
 
