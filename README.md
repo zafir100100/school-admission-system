@@ -46,7 +46,7 @@ Start Docker Compose, then run the integration test script from a shell with Pyt
 
 `React UI (localhost:3000) → ASP.NET API (localhost:8080) → PostgreSQL (Docker network)`.
 
-- `backend/SchoolAdmission.Api`: Minimal APIs, EF Core models, PostgreSQL transactions
+- `backend/SchoolAdmission.Api`: ASP.NET Core API controllers, EF Core models, PostgreSQL transactions
 - `frontend`: React SPA and nginx container
 - `tests`: API integration and concurrency checks
 - `ASSUMPTIONS.md`: interpretations of unspecified behavior
