@@ -6,16 +6,15 @@ import {
   Users,
   Clock3,
   CheckCircle2,
-  Plus,
   RefreshCw,
-  ArrowRight,
   Trash2,
   AlertCircle,
-  BookOpen,
-  ClipboardList,
   CreditCard,
-  ChevronLeft,
 } from "lucide-react";
+import ClassesPage from "./ClassesPage.jsx";
+import ApplyPage from "./ApplyPage.jsx";
+import MyApplicationsPage from "./MyApplicationsPage.jsx";
+import AdminPage from "./AdminPage.jsx";
 import "./style.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -345,286 +344,45 @@ function App() {
             </div>
           </div>
           {tab === "classes" && (
-            <section>
-              <div className="sectionhead">
-                <div>
-                  <h2>সব ক্লাস ও শিফট</h2>
-                  <p>
-                    একই শ্রেণির সকাল ও দিনের শিফট আলাদা ক্লাস হিসেবে দেখানো হবে।
-                  </p>
-                </div>
-                <span className="counter">{bn(classes.length)}টি ক্লাস</span>
-              </div>
-              <div className="classgrid">
-                {classes.map((c) => (
-                  <article className="classcard" key={c.id}>
-                    <div className="classicon">
-                      <BookOpen size={22} />
-                    </div>
-                    <h3>{c.name}</h3>
-                    <div className="classmeta">
-                      <span>মোট সিট</span>
-                      <b>{bn(c.totalSeats)}টি</b>
-                    </div>
-                    <div className="bar">
-                      <div
-                        style={{
-                          width: `${c.totalSeats ? (100 * (c.heldSeats + c.confirmedSeats)) / c.totalSeats : 0}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="seatbreakdown">
-                      <span>
-                        হোল্ডে: <b>{bn(c.heldSeats)}</b>
-                      </span>
-                      <span>
-                        নিশ্চিত: <b>{bn(c.confirmedSeats)}</b>
-                      </span>
-                      <span>
-                        খালি: <b>{bn(c.availableSeats)}</b>
-                      </span>
-                    </div>
-                    <button
-                      className="primary full"
-                      onClick={() => openApply(c.id)}
-                    >
-                      আবেদন করুন <ArrowRight size={17} />
-                    </button>
-                  </article>
-                ))}
-                {classes.length === 0 && (
-                  <div className="empty">
-                    এখনও কোনো ক্লাস তৈরি হয়নি। স্কুল অ্যাডমিন ক্লাস তৈরি করতে
-                    পারবেন।
-                  </div>
-                )}
-              </div>
-            </section>
+            <ClassesPage classes={classes} bn={bn} onApply={openApply} />
           )}
           {tab === "apply" && (
-            <section>
-              <div className="sectionhead">
-                <div>
-                  <h2>আবেদন</h2>
-                  <p>প্রথমে ক্লাস নির্বাচন করুন, তারপর সিট সংরক্ষণ করুন।</p>
-                </div>
-              </div>
-              <div className="applypanel">
-                <div className="field">
-                  <label htmlFor="class-select">
-                    ক্লাস ও শিফট নির্বাচন করুন
-                  </label>
-                  <select
-                    id="class-select"
-                    value={selected || ""}
-                    onChange={(e) => setSelected(e.target.value || null)}
-                  >
-                    <option value="">একটি ক্লাস নির্বাচন করুন</option>
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {chosen ? (
-                  <>
-                    <div className="chosenclass">
-                      <h3>{chosen.name}</h3>
-                      <div className="seatbreakdown">
-                        <span>
-                          মোট সিট: <b>{bn(chosen.totalSeats)}</b>
-                        </span>
-                        <span>
-                          হোল্ডে: <b>{bn(chosen.heldSeats)}</b>
-                        </span>
-                        <span>
-                          নিশ্চিত: <b>{bn(chosen.confirmedSeats)}</b>
-                        </span>
-                        <span>
-                          খালি: <b>{bn(chosen.availableSeats)}</b>
-                        </span>
-                      </div>
-                    </div>
-                    {chosenHold ? (
-                      <>
-                        <div className="hint">
-                          এই ক্লাসে আপনার ইতিমধ্যে একটি আবেদন আছে। নিচে তার
-                          অবস্থা দেখুন।
-                        </div>
-                        {holdCard(chosenHold)}
-                      </>
-                    ) : (
-                      <button
-                        className="primary"
-                        disabled={
-                          !valid || loading || chosen.availableSeats <= 0
-                        }
-                        onClick={() =>
-                          act(
-                            () =>
-                              request(`/classes/${chosen.id}/holds`, {
-                                method: "POST",
-                              }),
-                            "সিট সাময়িকভাবে সংরক্ষিত হয়েছে। মেয়াদ শেষ হওয়ার আগে ভর্তি ফি দিন।",
-                          )
-                        }
-                      >
-                        {chosen.availableSeats <= 0
-                          ? "কোনো খালি সিট নেই"
-                          : "সিট সংরক্ষণ করে আবেদন করুন"}{" "}
-                        <ArrowRight size={16} />
-                      </button>
-                    )}
-                    {valid &&
-                      holds.filter(
-                        (h) =>
-                          h.classId === chosen.id &&
-                          !["HELD", "CONFIRMED"].includes(effective(h)),
-                      ).length > 0 && (
-                        <div className="pastapplications">
-                          <h3>আগের আবেদন</h3>
-                          {holds
-                            .filter(
-                              (h) =>
-                                h.classId === chosen.id &&
-                                !["HELD", "CONFIRMED"].includes(effective(h)),
-                            )
-                            .map(holdCard)}
-                        </div>
-                      )}
-                  </>
-                ) : (
-                  <div className="empty">
-                    আবেদন করতে উপরের তালিকা থেকে একটি ক্লাস নির্বাচন করুন।
-                  </div>
-                )}
-              </div>
-              <p className="feeinfo">
-                “ভর্তি ফি দিন” চাপলে সফল পেমেন্ট ধরে নেওয়া হবে। কোনো আসল টাকা
-                কাটা হবে না।
-              </p>
-            </section>
+            <ApplyPage
+              classes={classes}
+              selected={selected}
+              setSelected={setSelected}
+              chosen={chosen}
+              chosenHold={chosenHold}
+              valid={valid}
+              loading={loading}
+              act={act}
+              request={request}
+              holds={holds}
+              effective={effective}
+              holdCard={holdCard}
+              bn={bn}
+            />
           )}
           {tab === "mine" && (
-            <section>
-              <div className="sectionhead">
-                <div>
-                  <h2>শিক্ষার্থীর সব আবেদন</h2>
-                  <p>
-                    সংরক্ষিত, নিশ্চিত, বাতিল ও মেয়াদোত্তীর্ণ—সব আবেদনের অবস্থা।
-                  </p>
-                </div>
-                <span className="counter">{bn(holds.length)}টি আবেদন</span>
-              </div>
-              {!valid ? (
-                <div className="empty">
-                  আবেদন দেখতে জন্ম নিবন্ধন নম্বর লিখুন।
-                </div>
-              ) : holds.length === 0 ? (
-                <div className="empty">
-                  এই শিক্ষার্থীর কোনো আবেদন পাওয়া যায়নি। ক্লাস তালিকা থেকে আবেদন
-                  করুন।
-                </div>
-              ) : (
-                <div className="applicationlist">{holds.map(holdCard)}</div>
-              )}
-            </section>
+            <MyApplicationsPage
+              holds={holds}
+              valid={valid}
+              bn={bn}
+              holdCard={holdCard}
+            />
           )}
           {tab === "admin" && (
-            <section>
-              <div className="sectionhead">
-                <div>
-                  <h2>নতুন ক্লাস তৈরি</h2>
-                  <p>
-                    প্রতিটি শিফট আলাদা নামে তৈরি করুন। যেমন: “ষষ্ঠ শ্রেণি – সকাল
-                    শিফট” ও “ষষ্ঠ শ্রেণি – দিবা শিফট”।
-                  </p>
-                </div>
-              </div>
-              <form
-                className="createform"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  act(async () => {
-                    await request("/classes", {
-                      method: "POST",
-                      body: JSON.stringify({
-                        name: name.trim(),
-                        totalSeats: Number(seats),
-                      }),
-                    });
-                    setName("");
-                  }, "নতুন ক্লাস সফলভাবে তৈরি হয়েছে।");
-                }}
-              >
-                <div className="field">
-                  <label htmlFor="class-name">ক্লাস ও শিফটের নাম</label>
-                  <input
-                    id="class-name"
-                    required
-                    maxLength={160}
-                    placeholder="যেমন: ষষ্ঠ শ্রেণি – সকাল শিফট"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="class-seats">মোট সিট সংখ্যা</label>
-                  <input
-                    id="class-seats"
-                    required
-                    type="number"
-                    min="1"
-                    max="1000000"
-                    value={seats}
-                    onChange={(e) => setSeats(e.target.value)}
-                  />
-                </div>
-                <button className="primary" disabled={loading || !name.trim()}>
-                  <Plus size={17} /> ক্লাস তৈরি করুন
-                </button>
-              </form>
-              <div className="sectionhead">
-                <div>
-                  <h2>তৈরি করা ক্লাসসমূহ</h2>
-                  <p>প্রতিটি ক্লাসের বর্তমান সিটের হিসাব।</p>
-                </div>
-              </div>
-              <div className="tablewrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>ক্লাস ও শিফট</th>
-                      <th>মোট সিট</th>
-                      <th>হোল্ডে</th>
-                      <th>নিশ্চিত</th>
-                      <th>খালি</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {classes.map((c) => (
-                      <tr key={c.id}>
-                        <td>
-                          <b>{c.name}</b>
-                        </td>
-                        <td>{bn(c.totalSeats)}</td>
-                        <td>{bn(c.heldSeats)}</td>
-                        <td>{bn(c.confirmedSeats)}</td>
-                        <td>
-                          <span className="available">
-                            {bn(c.availableSeats)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {classes.length === 0 && (
-                  <div className="empty">এখনও কোনো ক্লাস তৈরি হয়নি।</div>
-                )}
-              </div>
-            </section>
+            <AdminPage
+              classes={classes}
+              bn={bn}
+              name={name}
+              setName={setName}
+              seats={seats}
+              setSeats={setSeats}
+              loading={loading}
+              act={act}
+              request={request}
+            />
           )}
           <footer>
             স্কুল ভর্তি ব্যবস্থাপনা · আগে এলে আগে সিট · কোনো লগইন প্রয়োজন নেই
