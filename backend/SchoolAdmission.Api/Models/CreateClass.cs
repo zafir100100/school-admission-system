@@ -1,0 +1,1 @@
+public record CreateClass(string Name, int TotalSeats);

@@ -1,26 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 
-public record CreateClass(string Name, int TotalSeats);
-
-public class AdmissionClass
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public int TotalSeats { get; set; }
-    public List<AdmissionHold> Holds { get; set; } = [];
-}
-
-public class AdmissionHold
-{
-    public string Id { get; set; } = "";
-    public string ClassId { get; set; } = "";
-    public AdmissionClass? Class { get; set; }
-    public string StudentId { get; set; } = "";
-    public string Status { get; set; } = "HELD";
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime ExpiresAt { get; set; }
-}
-
 public class AdmissionDb(DbContextOptions<AdmissionDb> options) : DbContext(options)
 {
     public DbSet<AdmissionClass> Classes => Set<AdmissionClass>();
